@@ -15,7 +15,7 @@ class aracOtomasyonu():
             self.mysqlConn = mysql.connect(
             host = "localhost",
             user = "root",
-            password = "")
+            password = "deneme")
         except:
             messagebox.showerror("Hata","Mysql bağlantısı kurulamadı\n Lütfen mysql sunucusunu başlatın")
         self.mysqlCursor = self.mysqlConn.cursor()
@@ -23,6 +23,7 @@ class aracOtomasyonu():
         self.musteriTabloOlustur()
         self.arabaTabloOlustur()
         self.kiralamaTabloOlustur()
+        
 
 
         self.pencere = tk.Tk()
@@ -73,6 +74,9 @@ class aracOtomasyonu():
 
         self.kiradaOlanAraclariGoruntuler = tk.Button(self.pencere, text = "Kirada Olan Araçları Görüntüle",width=25,height=8,font="Helvetica 10 bold",bg="white",fg="black",borderwidth=5,command=self.kiradaOlanAraclarinListesiEkran)
         self.kiradaOlanAraclariGoruntuler.grid(row=10, column=3,padx=10)
+
+        self.aramaEkraniAc = tk.Button(self.pencere, text = "Arama Ekranı",font="Helvetica 10 bold",bg="white",fg="black",borderwidth=5,command=self.aramaEkrani)
+        self.aramaEkraniAc.place(x=830,y=10)
 
     def musteriBilgileriEkrani(self):
         "Müşteri Bilgileri ekranı amacı Müşteri Bilgilerini kaydetmek"
@@ -612,6 +616,35 @@ class aracOtomasyonu():
         self.aboutPageText.insert("2.0", "Soyadı : ORTATEPE\r\n")
         self.aboutPageText.insert("3.0", "Okul No : 90210000172\r\n")
         self.aboutPageText.insert("4.0", "Araç kiralama sistemi Ödev\r")
+    def müşterileriGöster(self):
+        "Müşterileri göster"
+        
+    def aramaEkrani(self):
+        self.aramaEkraniPencere = tk.Toplevel(self.pencere)
+        self.aramaEkraniPencere.title("Arama")
+        self.aramaEkraniPencere.geometry("800x500")
+        self.aramaEkraniPencere.resizable(False, False)
+        self.aramaEkraniPencere.config(bg="#284b63")
 
+        self.aramaEkraniLabel = tk.Label(self.aramaEkraniPencere, text="Müşteri Arama (Tc Girin)", font=("Broadway 25 bold underline"),bg="#284b63",fg="white")
+        self.aramaEkraniLabel.pack(pady=10)
+
+        self.aramaEkraniEntry = tk.Entry(self.aramaEkraniPencere, width=50, font=("Arial", 12))
+        self.aramaEkraniEntry.pack(pady=10)
+
+        self.aramaEkraniButton = tk.Button(self.aramaEkraniPencere, text="Ara", font=("Arial", 12), command=self.musteriAra)
+        self.aramaEkraniButton.pack(pady=10)
+
+        self.aramaEkraniLabel = tk.Label(self.aramaEkraniPencere, text="", font=("Arial", 12), bg="#284b63")
+        self.aramaEkraniLabel.pack(pady=10)
+
+        self.aramaEkraniBilgi = tk.Label(self.aramaEkraniPencere, text="sırasıyla gelen bilgiler:\nid,ad,soyad,tcNo,dogumTarihi,adres,telefonNo,meslek,ehliyet,medeniHal,egitim", font=("Arial", 10), bg="#284b63")
+        self.aramaEkraniBilgi.pack(pady=10)
+    def musteriAra(self):
+        self.aramaCursor = self.mysqlConn.cursor()
+        self.aramaCursor.execute(F"USE db90210000172")
+        self.aramaCursor.execute(F"SELECT * FROM musteribilgileri WHERE tcNo = '{self.aramaEkraniEntry.get()}' ")
+        self.aramaVeriler = self.aramaCursor.fetchall()
+        self.aramaEkraniLabel.config(text=self.aramaVeriler)
    
 otomasyon = aracOtomasyonu()
