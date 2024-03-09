@@ -15,7 +15,7 @@ class aracOtomasyonu():
             self.mysqlConn = mysql.connect(
             host = "localhost",
             user = "root",
-            password = "deneme")
+            password = "")
         except:
             messagebox.showerror("Hata","Mysql bağlantısı kurulamadı\n Lütfen mysql sunucusunu başlatın")
         self.mysqlCursor = self.mysqlConn.cursor()
@@ -401,7 +401,7 @@ class aracOtomasyonu():
     def musteriTabloOlustur(self):
         "müşteri bilgilerini tutan tabloyu oluşturur."
         try:
-            self.mysqlCursor.execute(f"use db90210000172")
+            self.mysqlCursor.execute(f"use arabaKiralamaDB")
             self.mysqlCursor.execute("CREATE TABLE IF NOT EXISTS musteriBilgileri (id INT AUTO_INCREMENT PRIMARY KEY, ad VARCHAR(255), soyad VARCHAR(255), tcNo VARCHAR(255),dogumTarihi VARCHAR(255), adres VARCHAR(255), telefonNo VARCHAR(255),meslek VARCHAR(255),ehliyet VARCHAR(255),medeniHal VARCHAR(255),egitim VARCHAR(255))")
         except Exception as e:
             print(f"hata var {e}")
@@ -423,8 +423,8 @@ class aracOtomasyonu():
         "veritabanını oluşturur."
         try:
 
-            self.mysqlCursor.execute(f"CREATE DATABASE IF NOT EXISTS db90210000172")
-            self.mysqlCursor.execute(f"use db90210000172")
+            self.mysqlCursor.execute(f"CREATE DATABASE IF NOT EXISTS arabaKiralamaDB")
+            self.mysqlCursor.execute(f"use arabaKiralamaDB")
             print("Veri tabani olusturuldu")
         except Exception as e:
             print(f"hata var {e}")   
@@ -432,7 +432,7 @@ class aracOtomasyonu():
     def arabaTabloOlustur(self):
         "araba bilgilerini tutan tabloyu oluşturur."
         try:
-            self.mysqlCursor.execute(f"use db90210000172")
+            self.mysqlCursor.execute(f"use arabaKiralamaDB")
             self.mysqlCursor.execute("CREATE TABLE IF NOT EXISTS arabaBilgileri (id INT AUTO_INCREMENT PRIMARY KEY, marka VARCHAR(255), model VARCHAR(255),uretimYili INT(4),yakitTuru VARCHAR(255),vites VARCHAR(255),motorGucu INT(5),kasaTipi VARCHAR(255), motorHacmi INT(5),cekisTuru VARCHAR(255),kapiSayisi VARCHAR(255), renk VARCHAR(255),motorNo INT(5),sasiNo VARCHAR(255), gunlukKiralamaUcreti INT(6) DEFAULT '100',kiradaMi VARCHAR(255),kullanimDisi VARCHAR(255))")
         except Exception as e:
             print(f"hata var {e}")
@@ -453,7 +453,7 @@ class aracOtomasyonu():
     def kiralamaTabloOlustur(self):
         "kiralama bilgilerini tutan tabloyu oluşturur."
         try:
-            self.mysqlCursor.execute(f"use db90210000172")
+            self.mysqlCursor.execute(f"use arabaKiralamaDB")
             self.mysqlCursor.execute("CREATE TABLE IF NOT EXISTS kiralamabilgileri (id INT AUTO_INCREMENT PRIMARY KEY, adSoyadTc varchar(255), marka varchar(255),kiralamaSuresi INT(4),nereyeGidecek VARCHAR(255),ucret INT(9))")
         except Exception as e:
             print(f"kiralama tablosu oluşturulamadı \nhata durumu: {e}")
@@ -590,7 +590,7 @@ class aracOtomasyonu():
         self.helpPageText = tk.Text(self.helpPage, width=50, height=20, bg="white", font=("Arial", 12))
         self.helpPageText.pack()
         self.helpPageText.insert("1.0", "1-) Programı ilk çalıştırıldığında root kullanıcı adı ile mysql veritabanına bağlanır.\r\n")
-        self.helpPageText.insert("2.0", "2-) Veritabanı bağlantısı yapıldıktan sonra db90210000172 isimli veritabanı oluşturur.\r\n")
+        self.helpPageText.insert("2.0", "2-) Veritabanı bağlantısı yapıldıktan sonra arabaKiralamaDB isimli veritabanı oluşturur.\r\n")
         self.helpPageText.insert("3.0", "3-) Daha sonra 'arababilgileri' , 'müsteribilgileri' ve 'kiralamabilgileri' adlı üç adet tablo oluşturur.\r\n")
         self.helpPageText.insert("4.0", "4-) Ana ekrandan yapacağınız müşteri kayıt işlemi sonrasında veriler musteribilgileri adlı tabloya kaydedilir.\r")
         self.helpPageText.insert("5.0", "5-) Ana ekrandan yapacağınız araba kayıt işlemi sonrasında veriler arababilgileri adlı tabloya kaydedilir.\r\n")
@@ -614,8 +614,8 @@ class aracOtomasyonu():
         self.aboutPageText.pack()
         self.aboutPageText.insert("1.0", "Adı : Hamza\r\n")
         self.aboutPageText.insert("2.0", "Soyadı : ORTATEPE\r\n")
-        self.aboutPageText.insert("3.0", "Okul No : 90210000172\r\n")
-        self.aboutPageText.insert("4.0", "Araç kiralama sistemi Ödev\r")
+        self.aboutPageText.insert("3.0", "Araç kiralama sistemi\r\n")
+        self.aboutPageText.insert("4.0", "\r")
     def müşterileriGöster(self):
         "Müşterileri göster"
         
@@ -642,7 +642,7 @@ class aracOtomasyonu():
         self.aramaEkraniBilgi.pack(pady=10)
     def musteriAra(self):
         self.aramaCursor = self.mysqlConn.cursor()
-        self.aramaCursor.execute(F"USE db90210000172")
+        self.aramaCursor.execute(F"USE arabaKiralamaDB")
         self.aramaCursor.execute(F"SELECT * FROM musteribilgileri WHERE tcNo = '{self.aramaEkraniEntry.get()}' ")
         self.aramaVeriler = self.aramaCursor.fetchall()
         self.aramaEkraniLabel.config(text=self.aramaVeriler)
