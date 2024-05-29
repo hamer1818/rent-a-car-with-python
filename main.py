@@ -23,6 +23,7 @@ class aracOtomasyonu():
         self.musteriTabloOlustur()
         self.arabaTabloOlustur()
         self.kiralamaTabloOlustur()
+        self.kullaniciTabloOlustur()
         
 
 
@@ -32,10 +33,76 @@ class aracOtomasyonu():
         self.pencere.geometry("940x600")
         self.pencere.resizable(False, False)
         # mysql baglantisi yapiliyor
-        self.anaEkran()
-        self.musteriBilgileriniTablodanAl()
-        self.arabaBilgileriniTablodanAl()
+        # self.anaEkran()
+        self.girisVeKayitEkran()
+        # self.musteriBilgileriniTablodanAl()
+        # self.arabaBilgileriniTablodanAl()
         self.pencere.mainloop()
+
+    def girisVeKayitEkran(self):
+        "Giriş ve Kayıt ekranı"
+
+        self.girisEkrani = tk.Toplevel(self.pencere)
+        self.girisEkrani.title("Giriş ve Kayıt Ekranı")
+        self.girisEkrani.configure(background="#3c6e71")
+        self.girisEkrani.geometry("500x300")
+        self.girisEkrani.resizable(False, False)
+        self.girisEkrani.protocol("WM_DELETE_WINDOW",self.pencere.quit)
+        # en üst level pencere olsun
+        self.girisEkrani.attributes("-topmost", True)
+
+        self.kullaniciAdiLabel = tk.Label(self.girisEkrani, text = "Kullanıcı Adı:",font=("Helvetica 10 bold"),background="#3c6e71",foreground="white")
+        self.kullaniciAdiLabel.grid(row=10, column=0,padx=80)
+        self.kullaniciAdiEntry = tk.Entry(self.girisEkrani)
+        self.kullaniciAdiEntry.grid(row=10, column=1,pady=10)
+
+        self.sifreLabel = tk.Label(self.girisEkrani, text = "Şifre:",font=("Helvetica 10 bold"),background="#3c6e71",foreground="white")
+        self.sifreLabel.grid(row=11, column=0)
+        self.sifreEntry = tk.Entry(self.girisEkrani,show="*")
+        self.sifreEntry.grid(row=11, column=1,pady=10)
+
+        self.girisYapButon = tk.Button(self.girisEkrani, text = "Giriş Yap",command=self.girisYap,font=("Helvetica 10 bold"),background="white",foreground="#3c6e71",width=20)
+        self.girisYapButon.grid(row=12, column=0,columnspan=2,pady=5)
+
+        self.kayitOlButon = tk.Button(self.girisEkrani, text = "Kayıt Ol",command=self.kayitOl,font=("Helvetica 10 bold"),background="white",foreground="#3c6e71",width=20)
+        self.kayitOlButon.grid(row=13, column=0,columnspan=2,pady=5)
+        
+
+        
+
+    def girisYap(self):
+        "giriş yapma fonksiyonu"
+        
+        self.kullaniciAdi = self.kullaniciAdiEntry.get()
+        self.sifre = self.sifreEntry.get()
+        try:
+            self.mysqlCursor.execute("USE arabakiralamadb")
+            self.mysqlCursor.execute("SELECT * FROM kullanicibilgileri WHERE kullaniciAdi = %s AND sifre = %s",(self.kullaniciAdi,self.sifre))
+            self.kullaniciVerileri = self.mysqlCursor.fetchall()
+            if len(self.kullaniciVerileri) > 0:
+                self.girisEkrani.destroy()
+                self.anaEkran()
+                self.musteriBilgileriniTablodanAl()
+                self.arabaBilgileriniTablodanAl()
+            else:
+                messagebox.showerror("Hata","Kullanıcı adı veya şifre hatalı")
+        except:
+            messagebox.showerror("Hata","Kullanıcı adı veya şifre hatalı")
+    
+    
+
+    def kayitOl(self):
+        "kayıt olma fonksiyonu"
+        self.kullaniciAdi = self.kullaniciAdiEntry.get()
+        self.sifre = self.sifreEntry.get()
+        try:
+            self.mysqlCursor.execute("USE arabakiralamadb")
+            self.mysqlCursor.execute("INSERT INTO kullanicibilgileri (kullaniciAdi,sifre) VALUES (%s,%s)",(self.kullaniciAdi,self.sifre))
+            self.mysqlConn.commit()
+            messagebox.showinfo("Başarılı","Kayıt başarılı")
+        except:
+            messagebox.showerror("Hata","Kayıt başarısız")
+
   
     def anaEkran(self):
         # menu çubuğu oluşturup verilere daha kolay ulaşılmasını sağladım ve programın çalışma mantığını anlattım
@@ -457,6 +524,13 @@ class aracOtomasyonu():
             self.mysqlCursor.execute("CREATE TABLE IF NOT EXISTS kiralamabilgileri (id INT AUTO_INCREMENT PRIMARY KEY, adSoyadTc varchar(255), marka varchar(255),kiralamaSuresi INT(4),nereyeGidecek VARCHAR(255),ucret INT(9))")
         except Exception as e:
             print(f"kiralama tablosu oluşturulamadı \nhata durumu: {e}")
+    def kullaniciTabloOlustur(self):
+        "kullanıcı bilgilerini tutan tabloyu oluşturur."
+        try:
+            self.mysqlCursor.execute(f"use arabaKiralamaDB")
+            self.mysqlCursor.execute("CREATE TABLE IF NOT EXISTS kullaniciBilgileri (id INT AUTO_INCREMENT PRIMARY KEY, kullaniciAdi VARCHAR(255), sifre VARCHAR(255), yetki TINYINT(1) NOT NULL DEFAULT '0')")
+        except Exception as e:
+            print(f"kullanıcı tablosu oluşturulamadı \nhata durumu: {e}")
 
     def kayitliMusterileriGoruntule(self,pencere):
         "kayıtlı müşterileri görüntüler."
