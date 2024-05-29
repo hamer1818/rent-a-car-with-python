@@ -33,7 +33,7 @@ class aracOtomasyonu():
         self.pencere.geometry("940x600")
         self.pencere.resizable(False, False)
         # mysql baglantisi yapiliyor
-        # self.anaEkran()
+        # self.adminAnaEkran()
         self.girisVeKayitEkran()
         # self.musteriBilgileriniTablodanAl()
         # self.arabaBilgileriniTablodanAl()
@@ -77,17 +77,23 @@ class aracOtomasyonu():
         self.sifre = self.sifreEntry.get()
         try:
             self.mysqlCursor.execute("USE arabakiralamadb")
-            self.mysqlCursor.execute("SELECT * FROM kullanicibilgileri WHERE kullaniciAdi = %s AND sifre = %s",(self.kullaniciAdi,self.sifre))
-            self.kullaniciVerileri = self.mysqlCursor.fetchall()
-            if len(self.kullaniciVerileri) > 0:
-                self.girisEkrani.destroy()
-                self.anaEkran()
-                self.musteriBilgileriniTablodanAl()
-                self.arabaBilgileriniTablodanAl()
+            self.mysqlCursor.execute("SELECT * FROM kullanicibilgileri WHERE kullaniciAdi = %s AND sifre = %s", (self.kullaniciAdi, self.sifre))
+            self.kullaniciVerileri = self.mysqlCursor.fetchone()
+            
+            if self.kullaniciVerileri is not None:
+                if self.kullaniciVerileri[3] == 0:
+                    self.girisEkrani.destroy()
+                    self.kullaniciAnaEkran()
+                elif self.kullaniciVerileri[3] == 1:
+                    self.girisEkrani.destroy()
+                    self.adminAnaEkran()
+                else:
+                    messagebox.showerror("Hata", "Kullanıcı adı veya şifre hatalı")
             else:
-                messagebox.showerror("Hata","Kullanıcı adı veya şifre hatalı")
-        except:
-            messagebox.showerror("Hata","Kullanıcı adı veya şifre hatalı")
+                messagebox.showerror("Hata", "Kullanıcı adı veya şifre hatalı")
+        except Exception as e:
+            messagebox.showerror("Hata", f"Bir hata oluştu: {e}")
+
     
     
 
@@ -98,13 +104,16 @@ class aracOtomasyonu():
         try:
             self.mysqlCursor.execute("USE arabakiralamadb")
             self.mysqlCursor.execute("INSERT INTO kullanicibilgileri (kullaniciAdi,sifre) VALUES (%s,%s)",(self.kullaniciAdi,self.sifre))
+            # self.mysqlCursor.execute("SELECT id FROM kullanicibilgileri WHERE kullaniciAdi = %s AND sifre = %s",(self.kullaniciAdi,self.sifre))
+
+
             self.mysqlConn.commit()
             messagebox.showinfo("Başarılı","Kayıt başarılı")
         except:
             messagebox.showerror("Hata","Kayıt başarısız")
 
   
-    def anaEkran(self):
+    def adminAnaEkran(self):
         # menu çubuğu oluşturup verilere daha kolay ulaşılmasını sağladım ve programın çalışma mantığını anlattım
         menu = tk.Menu(self.pencere)
         self.pencere.config(menu=menu)
@@ -127,8 +136,8 @@ class aracOtomasyonu():
         # edit_menu.add_command(label="Veritabanlarını temizle!!",command=self.veritabanınıTemizle)
 
         "ana ekranın amacı ana ekranda butonlar oluşturmak ve butonlara fonksiyonları atamak"
-        self.anaEkranBaslik = tk.Label(self.pencere, text = "Araç Kiralama Otomasyonu",font=("Broadway 25 bold underline"),bg="#353535",fg="white")
-        self.anaEkranBaslik.grid(row=0, column=0,columnspan=4,pady=20,padx=10)
+        self.adminAnaEkranBaslik = tk.Label(self.pencere, text = "Araç Kiralama Otomasyonu",font=("Broadway 25 bold underline"),bg="#353535",fg="white")
+        self.adminAnaEkranBaslik.grid(row=0, column=0,columnspan=4,pady=20,padx=10)
 
         self.musteriBilgileri = tk.Button(self.pencere, text = "Müşteri Kayıt",width=25,height=8,command=self.musteriBilgileriEkrani,font="Helvetica 10 bold",bg="white",fg="black",borderwidth=5)
         self.musteriBilgileri.grid(row=10, column=0,pady=150,padx=10)
@@ -144,6 +153,259 @@ class aracOtomasyonu():
 
         self.aramaEkraniAc = tk.Button(self.pencere, text = "Arama Ekranı",font="Helvetica 10 bold",bg="white",fg="black",borderwidth=5,command=self.aramaEkrani)
         self.aramaEkraniAc.place(x=830,y=10)
+
+    def kullaniciAnaEkran(self):
+        "kullanıcı ana ekranı"
+        self.kullaniciAnaEkran = tk.Toplevel(self.pencere)
+        self.kullaniciAnaEkran.title("Kullanıcı Ana Ekran")
+        self.kullaniciAnaEkran.configure(background="#3c6e71")
+        self.kullaniciAnaEkran.geometry("500x300")
+        self.kullaniciAnaEkran.resizable(False, False)
+        self.kullaniciAnaEkran.protocol("WM_DELETE_WINDOW", self.pencere.quit)
+        self.kullaniciAnaEkran.attributes("-topmost", True)
+
+        # Başlık etiketi
+        self.baslik = tk.Label(
+            self.kullaniciAnaEkran,
+            text="Kullanıcı Ana Ekran",
+            font=("Helvetica", 16, "bold"),
+            background="#3c6e71",
+            foreground="white"
+        )
+        self.baslik.pack(pady=20)
+
+        # Kullanıcı bilgilerini güncelle butonu
+        self.kullaniciBilgileriGuncelle = tk.Button(
+            self.kullaniciAnaEkran,
+            text="Kullanıcı Bilgilerini Güncelle",
+            font=("Helvetica", 12, "bold"),
+            background="white",
+            foreground="#3c6e71",
+            width=25,
+            height=2,
+            relief="raised",
+            borderwidth=2,
+            command=self.bilgilerimiGuncelle
+        )
+        self.kullaniciBilgileriGuncelle.pack(pady=10)
+
+        # Kiradaki araçlar butonu
+        self.kiradakiAraclar = tk.Button(
+            self.kullaniciAnaEkran,
+            text="Kiradaki Araçlar",
+            font=("Helvetica", 12, "bold"),
+            background="white",
+            foreground="#3c6e71",
+            width=25,
+            height=2,
+            relief="raised",
+            borderwidth=2,
+            command=self.kiraladigimAraclar
+        )
+        self.kiradakiAraclar.pack(pady=10)
+
+    
+    def bilgilerimiGuncelle(self):
+        "kullanıcı bilgilerini güncelleme ekranı"
+        self.guncellemeEkrani = tk.Toplevel(self.kullaniciAnaEkran)
+        self.guncellemeEkrani.title("Kullanıcı Bilgilerini Güncelle")
+        self.guncellemeEkrani.configure(background="#3c6e71")
+        self.guncellemeEkrani.geometry("400x600")
+        self.guncellemeEkrani.resizable(False, False)
+        self.guncellemeEkrani.attributes("-topmost", True)
+
+        # Başlık etiketi
+        self.baslik = tk.Label(
+            self.guncellemeEkrani,
+            text="Kullanıcı Bilgilerini Güncelle",
+            font=("Helvetica", 16, "bold"),
+            background="#3c6e71",
+            foreground="white"
+        )
+        self.baslik.grid(row=0, column=0, columnspan=2, pady=20)
+
+        fields = [
+            ("Kullanıcı Adı:", "kullaniciAdiEntry"),
+            ("Şifre:", "sifreEntry", True),
+            ("Ad:", "adEntry"),
+            ("Soyad:", "soyadEntry"),
+            ("TC:", "tcEntry"),
+            ("Doğum Tarihi:", "dogumTarihiEntry"),
+            ("Adres:", "adresEntry"),
+            ("Telefon No:", "telefonNoEntry"),
+            ("Meslek:", "meslekEntry"),
+            ("Ehliyet Sınıfı:", "ehliyetSinifiEntry"),
+            ("Medeni Hali:", "medeniHaliEntry"),
+            ("Eğitim Durumu:", "egitimDurumuEntry")
+        ]
+
+        for idx, (label_text, entry_name, *password) in enumerate(fields, 1):
+            label = tk.Label(
+                self.guncellemeEkrani,
+                text=label_text,
+                font=("Helvetica", 12, "bold"),
+                background="#3c6e71",
+                foreground="white"
+            )
+            label.grid(row=idx, column=0, pady=5, padx=10, sticky="e")
+
+            if "dogumTarihiEntry" in entry_name:
+                try:
+                    entry = tkc.DateEntry(self.guncellemeEkrani, width=20, background='darkblue', foreground='white', borderwidth=2, year=2023)
+                except:
+                    entry = tk.Entry(self.guncellemeEkrani)
+            else:
+                entry = tk.Entry(self.guncellemeEkrani, show="*" if password else None)
+            entry.grid(row=idx, column=1, pady=5, padx=10, sticky="w")
+            setattr(self, entry_name, entry)
+
+        # veritabanından bilgileri getir ve tabloyu doldur
+        try:
+            self.mysqlCursor.execute("USE arabakiralamadb")
+            self.mysqlCursor.execute("SELECT k.kullaniciAdi, k.sifre, m.ad,m.soyad,m.tcNo,m.dogumTarihi,m.adres,m.telefonNo,m.meslek,m.ehliyet,m.medeniHal,m.egitim FROM kullanicibilgileri k INNER JOIN musteribilgileri m on m.id=k.id WHERE k.kullaniciAdi = %s", (self.kullaniciAdi,))
+            kullaniciBilgileri = self.mysqlCursor.fetchone()
+            self.kullaniciAdiEntry.insert(0, kullaniciBilgileri[0])
+            self.sifreEntry.insert(0, kullaniciBilgileri[1])
+            self.adEntry.insert(0, kullaniciBilgileri[3])
+            self.soyadEntry.insert(0, kullaniciBilgileri[4])
+            self.tcEntry.insert(0, kullaniciBilgileri[5])
+            self.dogumTarihiEntry.insert(0, kullaniciBilgileri[6])
+            self.adresEntry.insert(0, kullaniciBilgileri[7])
+            self.telefonNoEntry.insert(0, kullaniciBilgileri[8])
+            self.meslekEntry.insert(0, kullaniciBilgileri[9])
+            self.ehliyetSinifiEntry.insert(0, kullaniciBilgileri[10])
+            self.medeniHaliEntry.insert(0, kullaniciBilgileri[11])
+            self.egitimDurumuEntry.insert(0, kullaniciBilgileri[12])
+        except Exception as e:
+            messagebox.showerror("Hata", f"Bir hata oluştu: {e}")
+
+        # Güncelle butonu
+        self.guncelle = tk.Button(
+            self.guncellemeEkrani,
+            text="Güncelle",
+            font=("Helvetica", 12, "bold"),
+            background="white",
+            foreground="#3c6e71",
+            width=20,
+            height=2,
+            relief="raised",
+            borderwidth=2,
+            command=self.bilgileriGuncelle
+        )
+        self.guncelle.grid(row=len(fields)+1, column=0, columnspan=2, pady=20)
+    def bilgileriGuncelle(self):
+        "kullanıcı bilgilerini güncelleme fonksiyonu"
+        # Bilgileri al
+        kullaniciAdi = self.kullaniciAdiEntry.get()
+        sifre = self.sifreEntry.get()
+        ad = self.adEntry.get()
+        soyad = self.soyadEntry.get()
+        tc = self.tcEntry.get()
+        dogumTarihi = self.dogumTarihiEntry.get()
+        adres = self.adresEntry.get()
+        telefonNo = self.telefonNoEntry.get()
+        meslek = self.meslekEntry.get()
+        ehliyetSinifi = self.ehliyetSinifiEntry.get()
+        medeniHali = self.medeniHaliEntry.get()
+        egitimDurumu = self.egitimDurumuEntry.get()
+
+        try:
+            self.mysqlCursor.execute("USE arabakiralamadb")
+            self.mysqlCursor.execute("""
+                UPDATE kullanicibilgileri k
+                JOIN musteribilgileri m ON m.id = k.id
+                SET
+                    k.kullaniciAdi = %s,
+                    k.sifre = %s,
+                    m.ad = %s,
+                    m.soyad = %s,
+                    m.tcNo = %s,
+                    m.dogumTarihi = %s,
+                    m.adres = %s,
+                    m.telefonNo = %s,
+                    m.meslek = %s,
+                    m.ehliyet = %s,
+                    m.medeniHal = %s,
+                    m.egitim = %s
+                WHERE k.kullaniciAdi = %s
+            """, (kullaniciAdi, sifre, ad, soyad, tc, dogumTarihi, adres, telefonNo, meslek, ehliyetSinifi, medeniHali, egitimDurumu, kullaniciAdi))
+
+            self.mysqlConn.commit()
+            messagebox.showinfo("Başarılı", "Bilgileriniz başarıyla güncellendi.")
+        except Exception as e:
+            messagebox.showerror("Hata", f"Bir hata oluştu: {e}")
+
+    def kiraladigimAraclar(self):
+        "kiraladığım araçlar ekranı"
+        self.kiradakiAraclarEkrani = tk.Toplevel(self.kullaniciAnaEkran)
+        self.kiradakiAraclarEkrani.title("Kiradaki Araçlar")
+        self.kiradakiAraclarEkrani.configure(background="#3c6e71")
+        self.kiradakiAraclarEkrani.geometry("500x300")
+        self.kiradakiAraclarEkrani.resizable(False, False)
+        self.kiradakiAraclarEkrani.attributes("-topmost", True)
+
+        # Başlık etiketi
+        self.baslik = tk.Label(
+            self.kiradakiAraclarEkrani,
+            text="Kiradaki Araçlar",
+            font=("Helvetica", 16, "bold"),
+            background="#3c6e71",
+            foreground="white"
+        )
+        self.baslik.pack(pady=20)
+
+        # Kiradaki araçları getir
+        try:
+            self.mysqlCursor.execute("USE arabakiralamadb")
+            self.mysqlCursor.execute("""
+                SELECT a.aracTuru, a.marka, a.aracModeli, a.uretimYili, a.yakitTuru, a.vites, a.motorGucu, a.kasaTipi, a.motorHacmi, a.cekisTuru, a.kapiSayisi, a.renk, a.motorNo, a.sasiNo, a.gunlukKiralamaUcreti
+                FROM araba a
+                JOIN kiralama k ON k.aracID = a.id
+                JOIN musteribilgileri m ON m.id = k.musteriID
+                WHERE m.kullaniciAdi = %s
+            """, (self.kullaniciAdi,))
+            araclar = self.mysqlCursor.fetchall()
+
+            if araclar:
+                # Tablo oluştur
+                self.tree = ttk.Treeview(self.kiradakiAraclarEkrani, columns=(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15), show="headings")
+                self.tree.pack()
+
+                self.tree.heading(1, text="Araç Türü")
+                self.tree.heading(2, text="Marka")
+                self.tree.heading(3, text="Araç Modeli")
+                self.tree.heading(4, text="Üretim Yılı")
+                self.tree.heading(5, text="Yakıt Türü")
+                self.tree.heading(6, text="Vites")
+                self.tree.heading(7, text="Motor Gücü")
+                self.tree.heading(8, text="Kasa Tipi")
+                self.tree.heading(9, text="Motor Hacmi")
+                self.tree.heading(10, text="Çekiş Türü")
+                self.tree.heading(11, text="Kapı Sayısı")
+                self.tree.heading(12, text="Renk")
+                self.tree.heading(13, text="Motor No")
+                self.tree.heading(14, text="Şasi No")
+                self.tree.heading(15, text="Günlük Kiralama Ücreti")
+
+                for arac in araclar:
+                    self.tree.insert("", "end", values=arac)
+            else:
+                # Kirada araç yoksa
+                self.yokLabel = tk.Label(
+                    self.kiradakiAraclarEkrani,
+                    text="Kirada araç bulunmamaktadır.",
+                    font=("Helvetica", 12, "bold"),
+                    background="#3c6e71",
+                    foreground="white"
+                )
+                self.yokLabel.pack(pady=20)
+        except Exception as e:
+            messagebox.showerror("Hata", f"Bir hata oluştu: {e}")
+            
+
+        
+        
+
 
     def musteriBilgileriEkrani(self):
         "Müşteri Bilgileri ekranı amacı Müşteri Bilgilerini kaydetmek"
@@ -469,7 +731,33 @@ class aracOtomasyonu():
         "müşteri bilgilerini tutan tabloyu oluşturur."
         try:
             self.mysqlCursor.execute(f"use arabaKiralamaDB")
-            self.mysqlCursor.execute("CREATE TABLE IF NOT EXISTS musteriBilgileri (id INT AUTO_INCREMENT PRIMARY KEY, ad VARCHAR(255), soyad VARCHAR(255), tcNo VARCHAR(255),dogumTarihi VARCHAR(255), adres VARCHAR(255), telefonNo VARCHAR(255),meslek VARCHAR(255),ehliyet VARCHAR(255),medeniHal VARCHAR(255),egitim VARCHAR(255))")
+            self.mysqlCursor.execute("""CREATE TABLE IF NOT EXISTS musteriBilgileri (
+                id INT PRIMARY KEY,
+                ad VARCHAR(255),
+                soyad VARCHAR(255),
+                tcNo VARCHAR(255),
+                dogumTarihi VARCHAR(255),
+                adres VARCHAR(255),
+                telefonNo VARCHAR(255),
+                meslek VARCHAR(255),
+                ehliyet VARCHAR(255),
+                medeniHal VARCHAR(255),
+                egitim VARCHAR(255),
+                FOREIGN KEY (id) REFERENCES kullaniciBilgileri(id))""")
+            try:
+                self.mysqlCursor.execute("""
+                CREATE TRIGGER after_kullanici_insert
+                AFTER INSERT ON kullaniciBilgileri
+                FOR EACH ROW
+                BEGIN
+                    INSERT INTO musteriBilgileri (id, ad, soyad, tcNo, dogumTarihi, adres, telefonNo, meslek, ehliyet, medeniHal, egitim)
+                    VALUES (NEW.id, '', '', '', '', '', '', '', '', '', '');
+                END;
+
+                    """)
+            except:
+                print("Trigger oluşturulamadı")
+                    
         except Exception as e:
             print(f"hata var {e}")
 
