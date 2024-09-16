@@ -789,6 +789,7 @@ class aracOtomasyonu():
         try:
             self.mysqlCursor.execute(f"use arabaKiralamaDB")
             self.mysqlCursor.execute("CREATE TABLE IF NOT EXISTS arabaBilgileri (id INT AUTO_INCREMENT PRIMARY KEY, marka VARCHAR(255), model VARCHAR(255),uretimYili INT(4),yakitTuru VARCHAR(255),vites VARCHAR(255),motorGucu INT(5),kasaTipi VARCHAR(255), motorHacmi INT(5),cekisTuru VARCHAR(255),kapiSayisi VARCHAR(255), renk VARCHAR(255),motorNo INT(5),sasiNo VARCHAR(255), gunlukKiralamaUcreti INT(6) DEFAULT '100',kiradaMi VARCHAR(255),kullanimDisi VARCHAR(255))")
+            print("araba tablosu oluşturuldu")
         except Exception as e:
             print(f"hata var {e}")
     
@@ -810,6 +811,7 @@ class aracOtomasyonu():
         try:
             self.mysqlCursor.execute(f"use arabaKiralamaDB")
             self.mysqlCursor.execute("CREATE TABLE IF NOT EXISTS kiralamabilgileri (id INT AUTO_INCREMENT PRIMARY KEY, adSoyadTc varchar(255), marka varchar(255),kiralamaSuresi INT(4),nereyeGidecek VARCHAR(255),ucret INT(9))")
+            print("kiralama tablosu oluşturuldu")
         except Exception as e:
             print(f"kiralama tablosu oluşturulamadı \nhata durumu: {e}")
     def kullaniciTabloOlustur(self):
@@ -817,6 +819,7 @@ class aracOtomasyonu():
         try:
             self.mysqlCursor.execute(f"use arabaKiralamaDB")
             self.mysqlCursor.execute("CREATE TABLE IF NOT EXISTS kullaniciBilgileri (id INT AUTO_INCREMENT PRIMARY KEY, kullaniciAdi VARCHAR(255), sifre VARCHAR(255), yetki TINYINT(1) NOT NULL DEFAULT '0')")
+            print("kullanıcı tablosu oluşturuldu")
         except Exception as e:
             print(f"kullanıcı tablosu oluşturulamadı \nhata durumu: {e}")
 
